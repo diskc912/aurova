@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useRef } from "react";
 import dynamic from "next/dynamic";
+import Script from "next/script";
 import type { AppStage, SilenceRegion, ProgressInfo } from "@/types";
 import { useAuth } from "@/hooks/useAuth";
 import { loadFFmpeg, extractAudio, cutAndConcatFast, cutAndConcatPerfect } from "@/lib/ffmpeg";
@@ -216,6 +217,45 @@ export default function Home() {
     setDownloadUrl(null);
     setStage("upload");
   }, [downloadUrl]);
+
+  // ── Donate Gateway ──
+  const handleDonate = useCallback(async () => {
+    const amountStr = window.prompt("Support AutoCut ❤️!\nEnter donation amount in INR (Minimum ₹20):", "50");
+    if (!amountStr) return; // User cancelled
+    
+    const amount = parseFloat(amountStr);
+    if (isNaN(amount) || amount < 20) {
+      alert("Please enter a valid amount of at least ₹20.");
+      return;
+    }
+
+    try {
+      const res = await fetch("/api/donate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ amount }),
+      });
+      const data = await res.json();
+      
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to generate payment link.");
+      }
+      
+      // Use Cashfree SDK to open the checkout modal
+      if ((window as any).Cashfree) {
+        const cashfree = (window as any).Cashfree({ mode: data.environment });
+        cashfree.checkout({
+          paymentSessionId: data.payment_session_id,
+          redirectTarget: "_self", // Redirect back to this page after payment
+        });
+      } else {
+        alert("Payment SDK not loaded. Please refresh the page.");
+      }
+    } catch (err) {
+      console.error(err);
+      alert(`Payment Gateway Error: ${err instanceof Error ? err.message : "Unknown error"}`);
+    }
+  }, []);
 
   return (
     <>
@@ -444,11 +484,21 @@ export default function Home() {
           />
         )}
 
-        {/* Privacy Note */}
-        <div className="mt-16 text-center">
+        {/* Footer info & Donate */}
+        <div className="mt-16 flex flex-col items-center gap-6 pb-8">
+          <button
+            onClick={handleDonate}
+            className="group relative inline-flex items-center gap-2 overflow-hidden rounded-full bg-gradient-to-r from-emerald-500 to-teal-400 px-8 py-3 text-sm font-bold text-white shadow-lg shadow-emerald-500/25 transition-all hover:scale-105 hover:shadow-emerald-500/40 focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:ring-offset-2 focus:ring-offset-slate-900"
+          >
+            <div className="absolute inset-0 bg-white/20 opacity-0 transition-opacity group-hover:opacity-100"></div>
+            <span>Donate via Cashfree</span>
+            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+            </svg>
+          </button>
+          
           <p className="text-xs text-slate-600">
-            🔒 100% client-side processing. Your files never leave your
-            device.
+            🔒 100% client-side processing. Your files never leave your device.
           </p>
         </div>
       </main>
@@ -461,6 +511,12 @@ export default function Home() {
           setShowAuthModal(false);
           handleProcess();
         }}
+      />
+
+      {/* Cashfree SDK */}
+      <Script 
+        src="https://sdk.cashfree.com/js/v3/cashfree.js" 
+        strategy="beforeInteractive"
       />
     </>
   );

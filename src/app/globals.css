@@ -1,0 +1,64 @@
+@import "tailwindcss";
+
+@theme {
+  --color-bg-deep: #07080d;
+  --color-surface: rgba(17, 19, 27, 0.8);
+  --font-family-outfit: "Outfit", sans-serif;
+}
+
+/* Base styles */
+body {
+  background-color: #07080d;
+  font-family: "Outfit", sans-serif;
+}
+
+/* Animated background orbs */
+.bg-orbs::before,
+.bg-orbs::after {
+  content: "";
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(120px);
+  z-index: 0;
+  pointer-events: none;
+}
+.bg-orbs::before {
+  top: -20%;
+  left: -10%;
+  width: 60vw;
+  height: 60vw;
+  background: radial-gradient(circle, rgba(124, 58, 237, 0.12) 0%, transparent 70%);
+  animation: orbFloat 20s ease-in-out infinite;
+}
+.bg-orbs::after {
+  bottom: -30%;
+  right: -15%;
+  width: 50vw;
+  height: 50vw;
+  background: radial-gradient(circle, rgba(45, 212, 191, 0.08) 0%, transparent 70%);
+  animation: orbFloat 25s ease-in-out infinite reverse;
+}
+
+@keyframes orbFloat {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(30px, -30px) scale(1.05); }
+  66% { transform: translate(-20px, 20px) scale(0.95); }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(124, 58, 237, 0.3);
+  border-radius: 3px;
+}
+
+/* Wavesurfer region handles — make them visible */
+.wavesurfer-handle {
+  background-color: rgba(255, 255, 255, 0.7) !important;
+  width: 3px !important;
+}

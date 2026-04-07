@@ -26,7 +26,7 @@ export default function ProcessingView({
         </div>
 
         <div className="text-center">
-          <h2 className="mb-2 text-2xl font-bold text-white">Processing Complete!</h2>
+          <h2 className="mb-2 text-2xl font-bold text-slate-900 dark:text-white">Processing Complete!</h2>
           <p className="text-sm text-slate-400">
             Your video is ready with all silences removed.
           </p>
@@ -47,7 +47,7 @@ export default function ProcessingView({
           </a>
           <button
             onClick={onReset}
-            className="rounded-xl border border-white/10 px-6 py-3 font-semibold text-slate-400 transition hover:border-white/20 hover:text-white"
+            className="rounded-xl border border-slate-300 dark:border-white/10 px-6 py-3 font-semibold text-slate-600 dark:text-slate-400 transition hover:bg-slate-100 dark:hover:bg-transparent dark:hover:border-white/20 hover:text-slate-900 dark:hover:text-white"
           >
             Process Another
           </button>

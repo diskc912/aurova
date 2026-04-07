@@ -25,11 +25,11 @@ export default function AuthModal({ open, onClose, onSuccess }: AuthModalProps) 
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm">
-      <div className="relative mx-4 w-full max-w-md overflow-hidden rounded-3xl border border-white/10 bg-[#12131a]/95 p-8 shadow-2xl backdrop-blur-xl">
+      <div className="relative mx-4 w-full max-w-md overflow-hidden rounded-3xl border border-white/10 bg-white/95 dark:bg-[#12131a]/95 p-8 shadow-2xl backdrop-blur-xl">
         {/* Close button */}
         <button
           onClick={onClose}
-          className="absolute right-4 top-4 text-slate-500 transition hover:text-white"
+          className="absolute right-4 top-4 text-slate-500 transition hover:text-slate-900 dark:hover:text-white"
         >
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <line x1="18" y1="6" x2="6" y2="18" />
@@ -46,11 +46,11 @@ export default function AuthModal({ open, onClose, onSuccess }: AuthModalProps) 
             </svg>
           </div>
 
-          <h2 className="mb-2 text-xl font-bold text-white">
+          <h2 className="mb-2 text-xl font-bold text-slate-900 dark:text-white">
             Free Limit Reached
           </h2>
           <p className="mb-6 text-sm leading-relaxed text-slate-400">
-            You&apos;ve used your <strong className="text-white">{FREE_LIMIT} free edits</strong> as a guest.
+            You&apos;ve used your <strong className="text-slate-900 dark:text-white">{FREE_LIMIT} free edits</strong> as a guest.
             Sign in with Google to continue — it&apos;s free!
           </p>
 

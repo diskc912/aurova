@@ -1,48 +1,41 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:is(.dark *));
+
 @theme {
-  --color-bg-deep: #07080d;
-  --color-surface: rgba(17, 19, 27, 0.8);
+  --color-bg-app: var(--bg-app);
+  --color-text-main: var(--text-main);
+  --color-border-subtle: var(--border-subtle);
   --font-family-outfit: "Outfit", sans-serif;
+}
+
+@layer base {
+  :root {
+    --bg-app: #f8fafc; /* very light gray/slate */
+    --text-main: #0f172a; /* slate-900 */
+    --border-subtle: rgba(15, 23, 42, 0.1);
+    --dot-color: rgba(0, 0, 0, 0.08);
+  }
+  .dark {
+    --bg-app: #07080d; /* deep dark */
+    --text-main: #f1f5f9; /* slate-100 */
+    --border-subtle: rgba(255, 255, 255, 0.1);
+    --dot-color: rgba(255, 255, 255, 0.06);
+  }
 }
 
 /* Base styles */
 body {
-  background-color: #07080d;
-  font-family: "Outfit", sans-serif;
+  background-color: var(--bg-app);
+  color: var(--text-main);
+  font-family: var(--font-family-outfit);
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* Animated background orbs */
-.bg-orbs::before,
-.bg-orbs::after {
-  content: "";
-  position: fixed;
-  border-radius: 50%;
-  filter: blur(120px);
-  z-index: 0;
-  pointer-events: none;
-}
-.bg-orbs::before {
-  top: -20%;
-  left: -10%;
-  width: 60vw;
-  height: 60vw;
-  background: radial-gradient(circle, rgba(124, 58, 237, 0.12) 0%, transparent 70%);
-  animation: orbFloat 20s ease-in-out infinite;
-}
-.bg-orbs::after {
-  bottom: -30%;
-  right: -15%;
-  width: 50vw;
-  height: 50vw;
-  background: radial-gradient(circle, rgba(45, 212, 191, 0.08) 0%, transparent 70%);
-  animation: orbFloat 25s ease-in-out infinite reverse;
-}
-
-@keyframes orbFloat {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  33% { transform: translate(30px, -30px) scale(1.05); }
-  66% { transform: translate(-20px, 20px) scale(0.95); }
+/* Stitch dot pattern */
+.bg-stitch {
+  background-image: radial-gradient(var(--dot-color) 1.5px, transparent 1px);
+  background-size: 24px 24px;
 }
 
 /* Custom scrollbar */
@@ -57,7 +50,7 @@ body {
   border-radius: 3px;
 }
 
-/* Wavesurfer region handles — make them visible */
+/* Wavesurfer region handles */
 .wavesurfer-handle {
   background-color: rgba(255, 255, 255, 0.7) !important;
   width: 3px !important;

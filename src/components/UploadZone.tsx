@@ -40,10 +40,10 @@ export default function UploadZone({ onFileSelected }: UploadZoneProps) {
       }}
       onDragLeave={() => setIsDragging(false)}
       onDrop={handleDrop}
-      className={`group relative flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed px-8 py-20 transition-all duration-300 ${
+      className={`group relative flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed px-8 py-20 transition-all duration-300 backdrop-blur-xl ${
         isDragging
-          ? "scale-[1.02] border-violet-500 bg-violet-500/10 shadow-2xl shadow-violet-500/10"
-          : "border-white/10 bg-white/[0.02] hover:border-violet-500/40 hover:bg-violet-500/5"
+          ? "scale-[1.02] border-violet-500 bg-violet-500/10 shadow-[0_0_50px_-12px_rgba(168,85,247,0.5)]"
+          : "border-border-subtle bg-white/40 dark:bg-white/5 hover:border-violet-500/40 hover:bg-white/60 dark:hover:bg-violet-500/5 shadow-[0_0_40px_-15px_rgba(124,58,237,0.15)] hover:shadow-[0_0_50px_-12px_rgba(168,85,247,0.3)]"
       }`}
       onClick={() => document.getElementById("file-input")?.click()}
     >
@@ -57,10 +57,10 @@ export default function UploadZone({ onFileSelected }: UploadZoneProps) {
 
       {/* Icon */}
       <div
-        className={`mb-6 flex h-20 w-20 items-center justify-center rounded-2xl transition-all duration-300 ${
+        className={`mb-6 flex h-20 w-20 items-center justify-center rounded-2xl transition-all duration-300 shadow-sm ${
           isDragging
-            ? "bg-violet-500/20 text-violet-400"
-            : "bg-white/5 text-slate-500 group-hover:bg-violet-500/10 group-hover:text-violet-400"
+            ? "bg-violet-500/20 text-violet-600 dark:text-violet-400"
+            : "bg-slate-100 dark:bg-white/5 text-slate-500 group-hover:bg-violet-100 dark:group-hover:bg-violet-500/10 group-hover:text-violet-600 dark:group-hover:text-violet-400"
         }`}
       >
         <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -70,7 +70,7 @@ export default function UploadZone({ onFileSelected }: UploadZoneProps) {
         </svg>
       </div>
 
-      <h3 className="mb-2 text-xl font-semibold text-white">
+      <h3 className="mb-2 text-xl font-semibold text-slate-900 dark:text-white">
         Drop your video or audio file here
       </h3>
       <p className="mb-4 text-sm text-slate-500">
@@ -87,8 +87,8 @@ export default function UploadZone({ onFileSelected }: UploadZoneProps) {
         Browse Files
       </button>
 
-      {/* Glow effect */}
-      <div className="pointer-events-none absolute inset-0 rounded-2xl bg-gradient-to-r from-violet-600/0 via-violet-600/5 to-fuchsia-600/0 opacity-0 transition-opacity group-hover:opacity-100" />
+      {/* Purple Glass Glow effect */}
+      <div className="pointer-events-none absolute inset-0 rounded-2xl bg-gradient-to-r from-violet-600/0 via-violet-600/10 to-fuchsia-600/0 opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
     </div>
   );
 }

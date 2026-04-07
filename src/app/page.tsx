@@ -264,13 +264,13 @@ export default function Home() {
         {/* Hero */}
         {stage === "upload" && (
           <div className="mb-12 text-center">
-            <h1 className="mb-3 text-4xl font-bold tracking-tight text-white sm:text-5xl">
+            <h1 className="mb-3 text-4xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-5xl">
               Remove Silence from Videos
-              <span className="ml-2 bg-gradient-to-r from-violet-400 to-fuchsia-400 bg-clip-text text-transparent">
+              <span className="ml-2 bg-gradient-to-r from-violet-600 to-fuchsia-500 dark:from-violet-400 dark:to-fuchsia-400 bg-clip-text text-transparent">
                 Instantly
               </span>
             </h1>
-            <p className="mx-auto max-w-xl text-lg text-slate-400">
+            <p className="mx-auto max-w-xl text-lg text-slate-600 dark:text-slate-400">
               Upload your video, visually adjust the cuts, and download —
               all processing happens right here in your browser.
             </p>
@@ -296,7 +296,7 @@ export default function Home() {
         {stage === "editing" && audioUrl && (
           <div className="space-y-6">
             {/* File info */}
-            <div className="flex items-center justify-between rounded-xl border border-white/5 bg-white/[0.03] px-5 py-3">
+            <div className="flex items-center justify-between rounded-xl border border-slate-200 dark:border-white/5 bg-slate-100 dark:bg-white/[0.03] px-5 py-3">
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-violet-500/10 text-violet-400">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -305,7 +305,7 @@ export default function Home() {
                   </svg>
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-white">
+                  <p className="text-sm font-semibold text-slate-900 dark:text-white">
                     {videoFile?.name}
                   </p>
                   <p className="text-xs text-slate-500">
@@ -317,7 +317,7 @@ export default function Home() {
               </div>
               <button
                 onClick={handleReset}
-                className="text-xs text-slate-500 transition hover:text-white"
+                className="text-xs text-slate-500 transition hover:text-slate-900 dark:hover:text-white"
               >
                 Change file
               </button>
@@ -325,7 +325,7 @@ export default function Home() {
 
             {/* Settings */}
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              <div className="rounded-xl border border-white/5 bg-white/[0.03] p-4">
+              <div className="rounded-xl border border-slate-200 dark:border-white/5 bg-slate-100 dark:bg-white/[0.03] p-4">
                 <div className="mb-2 flex items-center justify-between">
                   <label className="text-xs font-semibold uppercase tracking-wider text-slate-400">
                     Silence Threshold
@@ -344,7 +344,7 @@ export default function Home() {
                   className="w-full accent-violet-500"
                 />
               </div>
-              <div className="rounded-xl border border-white/5 bg-white/[0.03] p-4">
+              <div className="rounded-xl border border-slate-200 dark:border-white/5 bg-slate-100 dark:bg-white/[0.03] p-4">
                 <div className="mb-2 flex items-center justify-between">
                   <label className="text-xs font-semibold uppercase tracking-wider text-slate-400">
                     Min Duration
@@ -364,7 +364,7 @@ export default function Home() {
                 />
               </div>
               
-              <div className="rounded-xl border border-white/5 bg-white/[0.03] p-4">
+              <div className="rounded-xl border border-slate-200 dark:border-white/5 bg-slate-100 dark:bg-white/[0.03] p-4">
                 <div className="mb-2 flex items-center justify-between">
                   <label className="text-xs font-semibold uppercase tracking-wider text-slate-400">
                     Padding (Margin)
@@ -384,7 +384,7 @@ export default function Home() {
                 />
               </div>
 
-              <div className="rounded-xl border border-white/5 bg-white/[0.03] p-4">
+              <div className="rounded-xl border border-slate-200 dark:border-white/5 bg-slate-100 dark:bg-white/[0.03] p-4">
                 <div className="mb-2 flex items-center justify-between">
                   <label className="text-xs font-semibold uppercase tracking-wider text-slate-400">
                     Export Mode
@@ -399,13 +399,13 @@ export default function Home() {
                     {exportMode.toUpperCase()}
                   </span>
                 </div>
-                <div className="mt-2 flex overflow-hidden rounded-lg border border-white/10 bg-black/50 p-1">
+                <div className="mt-2 flex overflow-hidden rounded-lg border border-slate-200 dark:border-white/10 bg-slate-200 dark:bg-black/50 p-1">
                   <button
                     onClick={() => setExportMode("fast")}
                     className={`flex-1 rounded-md py-1.5 text-xs font-bold transition ${
                       exportMode === "fast"
-                        ? "bg-white/10 text-white"
-                        : "text-slate-400 hover:text-white"
+                        ? "bg-white shadow dark:bg-white/10 text-slate-900 dark:text-white"
+                        : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
                     }`}
                   >
                     FAST
@@ -414,8 +414,8 @@ export default function Home() {
                     onClick={() => setExportMode("perfect")}
                     className={`flex-1 rounded-md py-1.5 text-xs font-bold transition ${
                       exportMode === "perfect"
-                        ? "bg-white/10 text-white"
-                        : "text-slate-400 hover:text-white"
+                        ? "bg-white shadow dark:bg-white/10 text-slate-900 dark:text-white"
+                        : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
                     }`}
                   >
                     PERFECT

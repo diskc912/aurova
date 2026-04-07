@@ -84,6 +84,7 @@ async function mountVideoFile(ff: FFmpeg, videoFile: File): Promise<string> {
   } catch (e) {}
 
   // Mount the File natively using WORKERFS (this gives us the ability to stream without reading to memory)
+  // @ts-expect-error WORKERFS is valid but not currently typed in this version
   await ff.mount("WORKERFS", { files: [videoFile] }, INPUT_MOUNTPATH);
   
   return inputName;

@@ -39,8 +39,9 @@ export async function loadFFmpeg(
   }
 
   // 2. Upgrade to Multi-Threading (WASM-MT):
-  // Change the core loader to use @ffmpeg/core-mt to utilize multiple CPU cores.
-  const baseURL = "https://unpkg.com/@ffmpeg/core-mt@0.12.6/dist/umd";
+  // Load core files from local /ffmpeg folder to satisfy COEP requirements
+  // Previously this was unpkg which was being blocked by the browser.
+  const baseURL = "/ffmpeg";
 
   await ffmpeg.load({
     coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, "text/javascript"),

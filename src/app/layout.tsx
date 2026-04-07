@@ -1,5 +1,12 @@
 import type { Metadata } from "next";
+import { Outfit } from "next/font/google";
 import "./globals.css";
+
+const outfit = Outfit({
+  subsets: ["latin"],
+  variable: "--font-family-outfit",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "AutoCut Video — Remove Silence Instantly",
@@ -13,13 +20,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark">
-      <head>
-        <link
-          href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap"
-          rel="stylesheet"
-        />
-      </head>
+    <html lang="en" className={`dark ${outfit.variable}`}>
       <body suppressHydrationWarning className="bg-stitch min-h-screen antialiased">
         {children}
       </body>

@@ -7,12 +7,14 @@ interface WaveformEditorProps {
   audioUrl: string;
   regions: SilenceRegion[];
   onRegionsChange: (regions: SilenceRegion[]) => void;
+  enhanceVoice: boolean;
 }
 
 export default function WaveformEditor({
   audioUrl,
   regions,
   onRegionsChange,
+  enhanceVoice,
 }: WaveformEditorProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const wsRef = useRef<any>(null);
@@ -20,6 +22,14 @@ export default function WaveformEditor({
   const regionsRef = useRef(regions);
   const [isPlaying, setIsPlaying] = useState(false);
   const [zoom, setZoom] = useState(10);
+
+  // Web Audio Nodes
+  const audioCtxRef = useRef<AudioContext | null>(null);
+  const sourceRef = useRef<any>(null);
+  const highpassRef = useRef<BiquadFilterNode | null>(null);
+  const lowpassRef = useRef<BiquadFilterNode | null>(null);
+  const compressorRef = useRef<DynamicsCompressorNode | null>(null);
+  const gainRef = useRef<GainNode | null>(null);
 
   // Keep regionsRef in sync
   useEffect(() => {
@@ -134,6 +144,42 @@ export default function WaveformEditor({
             handleRegionUpdate(r.id, region.start, region.end);
           });
         });
+
+        // Initialize Web Audio Emulation upon loaded media element
+        try {
+          const audioEl = ws.getMediaElement();
+          if (audioEl && !sourceRef.current) {
+            const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+            audioCtxRef.current = new AudioCtx();
+            const ctx = audioCtxRef.current;
+            sourceRef.current = ctx.createMediaElementSource(audioEl);
+
+            highpassRef.current = ctx.createBiquadFilter();
+            highpassRef.current.type = "highpass";
+            highpassRef.current.frequency.value = 80;
+
+            lowpassRef.current = ctx.createBiquadFilter();
+            lowpassRef.current.type = "lowpass";
+            lowpassRef.current.frequency.value = 12000;
+
+            compressorRef.current = ctx.createDynamicsCompressor();
+            compressorRef.current.threshold.value = -20;
+            compressorRef.current.ratio.value = 4;
+
+            gainRef.current = ctx.createGain();
+            gainRef.current.gain.value = 1.78; // Approx +5dB makeup
+
+            // Static internal connections
+            highpassRef.current.connect(lowpassRef.current);
+            lowpassRef.current.connect(compressorRef.current);
+            compressorRef.current.connect(gainRef.current);
+
+            // Initial manual routing
+            sourceRef.current.connect(ctx.destination);
+          }
+        } catch (e) {
+          console.warn("Could not init WebAudio preview:", e);
+        }
       });
 
       // Play/pause events to sync local react state
@@ -190,6 +236,28 @@ export default function WaveformEditor({
     container.addEventListener("wheel", handleWheel, { passive: false });
     return () => container.removeEventListener("wheel", handleWheel);
   }, []);
+
+  // Toggle Studio Voice Emulation Switch
+  useEffect(() => {
+    const src = sourceRef.current;
+    const ctx = audioCtxRef.current;
+    const hpf = highpassRef.current;
+    const gain = gainRef.current;
+
+    if (!src || !ctx || !hpf || !gain) return;
+
+    // Flush current links
+    src.disconnect();
+    gain.disconnect();
+
+    if (enhanceVoice) {
+      if (ctx.state === "suspended") ctx.resume();
+      src.connect(hpf);
+      gain.connect(ctx.destination);
+    } else {
+      src.connect(ctx.destination);
+    }
+  }, [enhanceVoice]);
 
   // Sync region colors when `regions` (toggled state) changes
   useEffect(() => {

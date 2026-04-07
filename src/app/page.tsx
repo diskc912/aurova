@@ -44,6 +44,7 @@ export default function Home() {
   const [minDuration, setMinDuration] = useState(0.5);
   const [padding, setPadding] = useState(0.2);
   const [exportMode, setExportMode] = useState<"fast" | "perfect">("fast");
+  const [enhanceVoice, setEnhanceVoice] = useState(false);
 
   // Refs for cleanup
   const audioUrlRef = useRef<string>("");
@@ -179,9 +180,9 @@ export default function Home() {
       setProgress({ stage: "Cutting and joining video...", percent: 20 });
       let outputBlob: Blob;
       if (exportMode === "fast") {
-        outputBlob = await cutAndConcatFast(ff, videoFile, keepSegments);
+        outputBlob = await cutAndConcatFast(ff, videoFile, keepSegments, enhanceVoice);
       } else {
-        outputBlob = await cutAndConcatPerfect(ff, videoFile, keepSegments);
+        outputBlob = await cutAndConcatPerfect(ff, videoFile, keepSegments, enhanceVoice);
       }
 
       const url = URL.createObjectURL(outputBlob);
@@ -205,7 +206,7 @@ export default function Home() {
       );
       setStage("editing");
     }
-  }, [videoFile, regions, user, audioUrl, exportMode]);
+  }, [videoFile, regions, user, audioUrl, exportMode, enhanceVoice]);
 
   // ── Reset ──
   const handleReset = useCallback(() => {
@@ -324,7 +325,7 @@ export default function Home() {
             </div>
 
             {/* Settings */}
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
               <div className="rounded-xl border border-slate-200 dark:border-white/5 bg-slate-100 dark:bg-white/[0.03] p-4">
                 <div className="mb-2 flex items-center justify-between">
                   <label className="text-xs font-semibold uppercase tracking-wider text-slate-400">
@@ -422,6 +423,46 @@ export default function Home() {
                   </button>
                 </div>
               </div>
+
+              {/* Voice Enhance setting */}
+              <div className="rounded-xl border border-slate-200 dark:border-white/5 bg-slate-100 dark:bg-white/[0.03] p-4">
+                <div className="mb-2 flex items-center justify-between">
+                  <label className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                    Voice Enhance
+                  </label>
+                  <span
+                    className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${
+                      enhanceVoice
+                        ? "bg-violet-500/15 text-violet-600 dark:text-violet-300"
+                        : "bg-slate-200 text-slate-600 dark:bg-slate-500/15 dark:text-slate-400"
+                    }`}
+                  >
+                    {enhanceVoice ? "ON" : "OFF"}
+                  </span>
+                </div>
+                <div className="mt-2 flex overflow-hidden rounded-lg border border-slate-200 dark:border-white/10 bg-slate-200 dark:bg-black/50 p-1">
+                  <button
+                    onClick={() => setEnhanceVoice(false)}
+                    className={`flex-1 rounded-md py-1.5 text-xs font-bold transition ${
+                      !enhanceVoice
+                        ? "bg-white shadow dark:bg-white/10 text-slate-900 dark:text-white"
+                        : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                    }`}
+                  >
+                    OFF
+                  </button>
+                  <button
+                    onClick={() => setEnhanceVoice(true)}
+                    className={`flex-1 rounded-md py-1.5 text-xs font-bold transition ${
+                      enhanceVoice
+                        ? "bg-white shadow dark:bg-white/10 text-slate-900 dark:text-white"
+                        : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                    }`}
+                  >
+                    STUDIO
+                  </button>
+                </div>
+              </div>
             </div>
 
             {/* Re-detect button */}
@@ -439,6 +480,7 @@ export default function Home() {
               audioUrl={audioUrl}
               regions={regions}
               onRegionsChange={setRegions}
+              enhanceVoice={enhanceVoice}
             />
 
             {/* Action buttons */}

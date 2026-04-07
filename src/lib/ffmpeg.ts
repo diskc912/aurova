@@ -124,7 +124,8 @@ export async function extractAudio(
 export async function cutAndConcatFast(
   ff: FFmpeg,
   videoFile: File,
-  keepSegments: { start: number; end: number }[]
+  keepSegments: { start: number; end: number }[],
+  enhanceVoice: boolean = false
 ): Promise<Blob> {
   const inputName = await mountVideoFile(ff, videoFile);
   const outputName = `output.mp4`;
@@ -144,6 +145,13 @@ export async function cutAndConcatFast(
 
     const duration = (seg.end - seg.start).toFixed(3);
 
+    const audioFilters = enhanceVoice
+      ? [
+          "-af",
+          "afftdn=nf=-25,highpass=f=80,lowpass=f=12000,acompressor=threshold=-20dB:ratio=4:makeup=5,loudnorm=I=-16:TP=-1.5:LRA=11",
+        ]
+      : [];
+
     // Fast-seek method used (-ss before -i) for glitch-free extraction
     // Utilizing OPFS disk mapping completely
     await ff.exec([
@@ -154,6 +162,7 @@ export async function cutAndConcatFast(
       "-c:v", "copy",
       "-c:a", "aac",
       "-b:a", "192k",
+      ...audioFilters,
       "-avoid_negative_ts", "make_zero",
       segName,
     ]);
@@ -199,7 +208,8 @@ export async function cutAndConcatFast(
 export async function cutAndConcatPerfect(
   ff: FFmpeg,
   videoFile: File,
-  keepSegments: { start: number; end: number }[]
+  keepSegments: { start: number; end: number }[],
+  enhanceVoice: boolean = false
 ): Promise<Blob> {
   const inputName = await mountVideoFile(ff, videoFile);
   const outputName = `output.mp4`;
@@ -217,6 +227,13 @@ export async function cutAndConcatPerfect(
 
     const duration = (seg.end - seg.start).toFixed(3);
 
+    const audioFilters = enhanceVoice
+      ? [
+          "-af",
+          "afftdn=nf=-25,highpass=f=80,lowpass=f=12000,acompressor=threshold=-20dB:ratio=4:makeup=5,loudnorm=I=-16:TP=-1.5:LRA=11",
+        ]
+      : [];
+
     // Re-encoding for PERFECT mode while maintaining physical file approach
     await ff.exec([
       "-threads", "0",
@@ -228,6 +245,7 @@ export async function cutAndConcatPerfect(
       "-crf", "23",
       "-c:a", "aac",
       "-b:a", "192k",
+      ...audioFilters,
       "-avoid_negative_ts", "make_zero",
       segName,
     ]);

@@ -20,7 +20,7 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className="bg-orbs min-h-screen text-slate-100 antialiased">
+      <body suppressHydrationWarning className="bg-orbs min-h-screen text-slate-100 antialiased">
         {children}
       </body>
     </html>

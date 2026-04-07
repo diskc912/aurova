@@ -76,6 +76,34 @@ export default function WaveformEditor({
 
       const wsRegions = ws.registerPlugin(RegionsPlugin.create());
 
+      // 1. Enable Drag Selection to manually draw new cut regions
+      wsRegions.enableDragSelection({
+        color: "rgba(239, 68, 68, 0.30)",
+      });
+
+      // Listen for newly drawn regions and map them back to the React state
+      wsRegions.on("region-created", (region: any) => {
+        const exists = regionsRef.current.find((r) => r.id === region.id);
+        if (!exists) {
+          const newRegion = {
+            id: region.id,
+            start: region.start,
+            end: region.end,
+            duration: region.end - region.start,
+            ignored: false,
+          };
+
+          region.on("dblclick", () => {
+            handleDoubleClick(newRegion.id);
+          });
+          region.on("update-end", () => {
+            handleRegionUpdate(newRegion.id, region.start, region.end);
+          });
+
+          onRegionsChange([...regionsRef.current, newRegion]);
+        }
+      });
+
       wsRef.current = ws;
       wsRegionsRef.current = wsRegions;
 
@@ -109,6 +137,19 @@ export default function WaveformEditor({
       // Play/pause on click
       ws.on("interaction", () => {
         ws.playPause();
+      });
+
+      // 2. Smart Preview: Skip cuts while listening
+      ws.on("timeupdate", (currentTime: number) => {
+        if (destroyed) return;
+        const activeCuts = regionsRef.current.filter((r) => !r.ignored);
+        for (const cut of activeCuts) {
+          // If the playhead wanders into an active red cut region, instantly skip to its end!
+          if (currentTime >= cut.start && currentTime < cut.end) {
+            ws.setTime(cut.end);
+            break;
+          }
+        }
       });
     }
 

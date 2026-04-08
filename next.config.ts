@@ -7,8 +7,13 @@ const nextConfig: NextConfig = {
         source: "/(.*)",
         headers: [
           {
+            // "credentialless" is the modern alternative to "require-corp".
+            // It keeps self.crossOriginIsolated = true (so SharedArrayBuffer
+            // works for FFmpeg multi-threading) while allowing third-party
+            // scripts like the Cashfree SDK to load without needing their
+            // own Cross-Origin-Resource-Policy header.
             key: "Cross-Origin-Embedder-Policy",
-            value: "require-corp",
+            value: "credentialless",
           },
           {
             key: "Cross-Origin-Opener-Policy",

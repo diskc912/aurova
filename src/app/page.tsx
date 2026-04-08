@@ -555,10 +555,10 @@ export default function Home() {
         }}
       />
 
-      {/* Cashfree SDK */}
+      {/* Cashfree SDK — lazyOnload works correctly under COEP: credentialless */}
       <Script 
         src="https://sdk.cashfree.com/js/v3/cashfree.js" 
-        strategy="beforeInteractive"
+        strategy="lazyOnload"
       />
     </>
   );

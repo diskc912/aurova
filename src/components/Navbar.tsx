@@ -3,7 +3,13 @@
 import { useAuth } from "@/hooks/useAuth";
 import { useEffect, useState } from "react";
 
-export default function Navbar({ onLoginClick }: { onLoginClick?: () => void }) {
+export default function Navbar({ 
+  onLoginClick, 
+  showSignIn = true 
+}: { 
+  onLoginClick?: () => void,
+  showSignIn?: boolean
+}) {
   const { user, logout } = useAuth();
   const [isDark, setIsDark] = useState(true);
 
@@ -86,7 +92,7 @@ export default function Navbar({ onLoginClick }: { onLoginClick?: () => void }) 
                 Log out
               </button>
             </div>
-          ) : (
+          ) : showSignIn ? (
             <button
               onClick={onLoginClick}
               className="group flex items-center gap-2 rounded-full border border-slate-300 dark:border-white/10 bg-slate-100 dark:bg-white/5 px-3.5 py-1.5 text-xs font-medium text-slate-600 dark:text-slate-400 transition hover:border-violet-500/40 hover:bg-violet-500/5 hover:text-violet-600 dark:hover:text-violet-300"
@@ -100,7 +106,7 @@ export default function Navbar({ onLoginClick }: { onLoginClick?: () => void }) 
                 <polyline points="9 18 15 12 9 6"/>
               </svg>
             </button>
-          )}
+          ) : null}
         </div>
       </div>
     </nav>

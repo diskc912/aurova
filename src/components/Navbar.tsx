@@ -3,7 +3,7 @@
 import { useAuth } from "@/hooks/useAuth";
 import { useEffect, useState } from "react";
 
-export default function Navbar() {
+export default function Navbar({ onLoginClick }: { onLoginClick?: () => void }) {
   const { user, logout } = useAuth();
   const [isDark, setIsDark] = useState(true);
 
@@ -87,9 +87,19 @@ export default function Navbar() {
               </button>
             </div>
           ) : (
-            <span className="rounded-full bg-slate-100 dark:bg-white/5 px-3 py-1 text-xs font-medium text-slate-500">
-              Guest Mode
-            </span>
+            <button
+              onClick={onLoginClick}
+              className="group flex items-center gap-2 rounded-full border border-slate-300 dark:border-white/10 bg-slate-100 dark:bg-white/5 px-3.5 py-1.5 text-xs font-medium text-slate-600 dark:text-slate-400 transition hover:border-violet-500/40 hover:bg-violet-500/5 hover:text-violet-600 dark:hover:text-violet-300"
+            >
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+              </svg>
+              <span>Sign In</span>
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="opacity-50 group-hover:opacity-100 transition">
+                <polyline points="9 18 15 12 9 6"/>
+              </svg>
+            </button>
           )}
         </div>
       </div>

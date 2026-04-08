@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import dynamic from "next/dynamic";
 import Script from "next/script";
 import type { AppStage, SilenceRegion, ProgressInfo } from "@/types";
@@ -12,11 +12,14 @@ import {
   incrementGuestUsage,
   incrementFirestoreUsage,
 } from "@/lib/usageTracker";
+import { loadUserSettings, saveUserSettings, DEFAULT_SETTINGS } from "@/lib/userSettings";
 
 import Navbar from "@/components/Navbar";
 import UploadZone from "@/components/UploadZone";
 import ProcessingView from "@/components/ProcessingView";
 import AuthModal from "@/components/AuthModal";
+import HowToUseModal from "@/components/HowToUseModal";
+import DonatePanel from "@/components/DonatePanel";
 
 // Dynamic import to avoid SSR for WaveSurfer
 const WaveformEditor = dynamic(
@@ -38,16 +41,90 @@ export default function Home() {
   });
   const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authReason, setAuthReason] = useState<"limit" | "voluntary">("limit");
+  const [showHowTo, setShowHowTo] = useState(false);
 
-  // Settings
-  const [threshold, setThreshold] = useState(-30);
-  const [minDuration, setMinDuration] = useState(0.5);
-  const [padding, setPadding] = useState(0.2);
-  const [exportMode, setExportMode] = useState<"fast" | "perfect">("fast");
-  const [enhanceVoice, setEnhanceVoice] = useState(false);
+  // Settings — defaults; loaded from Firestore for logged-in users, localStorage for guests
+  const [threshold, setThreshold] = useState(DEFAULT_SETTINGS.threshold);
+  const [minDuration, setMinDuration] = useState(DEFAULT_SETTINGS.minDuration);
+  const [padding, setPadding] = useState(DEFAULT_SETTINGS.padding);
+  const [exportMode, setExportMode] = useState<"fast" | "perfect">(DEFAULT_SETTINGS.exportMode);
+  const [enhanceVoice, setEnhanceVoice] = useState(DEFAULT_SETTINGS.enhanceVoice);
+
+  // Load settings: Firestore for logged-in users, localStorage for guests
+  useEffect(() => {
+    if (user) {
+      // Logged-in: fetch from Firestore and apply
+      loadUserSettings(user.uid).then((s) => {
+        setThreshold(s.threshold);
+        setMinDuration(s.minDuration);
+        setPadding(s.padding);
+        setExportMode(s.exportMode);
+        setEnhanceVoice(s.enhanceVoice);
+      });
+    } else {
+      // Guest: restore from localStorage
+      setThreshold(parseFloat(localStorage.getItem("ac_threshold") ?? String(DEFAULT_SETTINGS.threshold)));
+      setMinDuration(parseFloat(localStorage.getItem("ac_minDuration") ?? String(DEFAULT_SETTINGS.minDuration)));
+      setPadding(parseFloat(localStorage.getItem("ac_padding") ?? String(DEFAULT_SETTINGS.padding)));
+      setExportMode((localStorage.getItem("ac_exportMode") as "fast" | "perfect") ?? DEFAULT_SETTINGS.exportMode);
+      setEnhanceVoice(localStorage.getItem("ac_enhanceVoice") === "true");
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.uid]); // Re-run when user logs in/out
+
+  // Persist settings — debounced Firestore save for logged-in users, instant localStorage for guests
+  const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => {
+    const settings = { threshold, minDuration, padding, exportMode, enhanceVoice };
+    if (user) {
+      // Debounce: wait 1.5s after last change before writing to Firestore
+      if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+      saveTimerRef.current = setTimeout(() => {
+        saveUserSettings(user.uid, settings);
+      }, 1500);
+    } else {
+      // Guest: write to localStorage immediately
+      localStorage.setItem("ac_threshold", String(threshold));
+      localStorage.setItem("ac_minDuration", String(minDuration));
+      localStorage.setItem("ac_padding", String(padding));
+      localStorage.setItem("ac_exportMode", exportMode);
+      localStorage.setItem("ac_enhanceVoice", String(enhanceVoice));
+    }
+    return () => { if (saveTimerRef.current) clearTimeout(saveTimerRef.current); };
+  }, [threshold, minDuration, padding, exportMode, enhanceVoice, user]);
 
   // Refs for cleanup
   const audioUrlRef = useRef<string>("");
+
+  // Undo history for region edits (Ctrl+Z)
+  const regionHistoryRef = useRef<SilenceRegion[][]>([]);
+
+  const setRegionsWithHistory = useCallback(
+    (next: SilenceRegion[]) => {
+      setRegions((prev) => {
+        regionHistoryRef.current = [...regionHistoryRef.current, prev].slice(-50); // keep last 50
+        return next;
+      });
+    },
+    []
+  );
+
+  // Ctrl+Z — undo last region change
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === "z") {
+        e.preventDefault();
+        const history = regionHistoryRef.current;
+        if (history.length === 0) return;
+        const prev = history[history.length - 1];
+        regionHistoryRef.current = history.slice(0, -1);
+        setRegions(prev);
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, []);
 
   // ── File Selected ──
   const handleFileSelected = useCallback(async (file: File) => {
@@ -128,6 +205,7 @@ export default function Home() {
 
     // Check usage limit for guests
     if (!user && isGuestLimitReached()) {
+      setAuthReason("limit");
       setShowAuthModal(true);
       return;
     }
@@ -215,6 +293,7 @@ export default function Home() {
     setVideoFile(null);
     setAudioUrl("");
     setRegions([]);
+    regionHistoryRef.current = [];
     setDownloadUrl(null);
     setStage("upload");
   }, [downloadUrl]);
@@ -258,9 +337,26 @@ export default function Home() {
     }
   }, []);
 
+  // DonatePanel callback — called by DonatePanel with the user-chosen amount
+  const handleDonatePanel = useCallback(async (amount: number) => {
+    const res = await fetch("/api/donate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ amount }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Failed to generate payment link.");
+    if ((window as any).Cashfree) {
+      const cashfree = (window as any).Cashfree({ mode: data.environment });
+      cashfree.checkout({ paymentSessionId: data.payment_session_id, redirectTarget: "_self" });
+    } else {
+      throw new Error("Payment SDK not loaded. Please refresh the page.");
+    }
+  }, []);
+
   return (
     <>
-      <Navbar />
+      <Navbar onLoginClick={() => { setAuthReason("voluntary"); setShowAuthModal(true); }} />
       <main className="relative z-10 mx-auto max-w-5xl px-4 pb-16 pt-24">
         {/* Hero */}
         {stage === "upload" && (
@@ -275,6 +371,15 @@ export default function Home() {
               Upload your video, visually adjust the cuts, and download —
               all processing happens right here in your browser.
             </p>
+            <button
+              onClick={() => setShowHowTo(true)}
+              className="mt-5 inline-flex items-center gap-2 rounded-full border border-slate-300 dark:border-white/10 bg-white dark:bg-white/5 px-5 py-2 text-sm font-medium text-slate-600 dark:text-slate-400 shadow-sm transition hover:border-violet-500/40 hover:text-violet-600 dark:hover:text-violet-300"
+            >
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>
+              </svg>
+              How to Use
+            </button>
           </div>
         )}
 
@@ -479,12 +584,31 @@ export default function Home() {
             <WaveformEditor
               audioUrl={audioUrl}
               regions={regions}
-              onRegionsChange={setRegions}
+              onRegionsChange={setRegionsWithHistory}
               enhanceVoice={enhanceVoice}
             />
 
             {/* Action buttons */}
-            <div className="flex justify-center gap-4 pt-2">
+            <div className="flex flex-wrap justify-center gap-3 pt-2">
+              {/* Undo button */}
+              <button
+                onClick={() => {
+                  const history = regionHistoryRef.current;
+                  if (history.length === 0) return;
+                  const prev = history[history.length - 1];
+                  regionHistoryRef.current = history.slice(0, -1);
+                  setRegions(prev);
+                }}
+                disabled={regionHistoryRef.current.length === 0}
+                title="Undo last region change (Ctrl+Z)"
+                className="flex items-center gap-2 rounded-xl border border-slate-300 dark:border-white/10 px-5 py-3.5 text-sm font-semibold text-slate-600 dark:text-slate-400 transition hover:border-violet-500/40 hover:text-violet-600 dark:hover:text-violet-300 disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M3 7v6h6" />
+                  <path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13" />
+                </svg>
+                Undo
+              </button>
               <button
                 onClick={handleProcess}
                 disabled={regions.filter((r) => !r.ignored).length === 0}
@@ -527,33 +651,27 @@ export default function Home() {
         )}
 
         {/* Footer info & Donate */}
-        <div className="mt-16 flex flex-col items-center gap-6 pb-8">
-          <button
-            onClick={handleDonate}
-            className="group relative inline-flex items-center gap-2 overflow-hidden rounded-full bg-gradient-to-r from-emerald-500 to-teal-400 px-8 py-3 text-sm font-bold text-white shadow-lg shadow-emerald-500/25 transition-all hover:scale-105 hover:shadow-emerald-500/40 focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:ring-offset-2 focus:ring-offset-slate-900"
-          >
-            <div className="absolute inset-0 bg-white/20 opacity-0 transition-opacity group-hover:opacity-100"></div>
-            <span>Donate via Cashfree</span>
-            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
-            </svg>
-          </button>
-          
-          <p className="text-xs text-slate-600">
+        <div className="mt-16 flex flex-col items-center gap-2 pb-8">
+          <DonatePanel onDonate={handleDonatePanel} />
+          <p className="mt-4 text-xs text-slate-600 dark:text-slate-600">
             🔒 100% client-side processing. Your files never leave your device.
           </p>
         </div>
       </main>
 
-    {/* Auth Modal */}
+    {/* Auth Modal — usage limit hit */}
       <AuthModal
         open={showAuthModal}
         onClose={() => setShowAuthModal(false)}
+        reason={authReason}
         onSuccess={() => {
           setShowAuthModal(false);
           handleProcess();
         }}
       />
+
+      {/* How To Use Modal */}
+      <HowToUseModal open={showHowTo} onClose={() => setShowHowTo(false)} />
 
       {/* Cashfree SDK — lazyOnload works correctly under COEP: credentialless */}
       <Script 

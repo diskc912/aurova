@@ -23,6 +23,21 @@ export default function WaveformEditor({
   const [isPlaying, setIsPlaying] = useState(false);
   const [zoom, setZoom] = useState(10);
 
+  // Scroll/pan state
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const isDraggingRef = useRef(false);
+  const dragStartRef = useRef({ x: 0, scrollLeft: 0 });
+  const mouseXRef = useRef(0);
+
+  // Undo history (local to editor, where events actually fire)
+  const historyRef = useRef<SilenceRegion[][]>([]);
+  const selectedRegionIdRef = useRef<string | null>(null);
+
+  // Push to history before any regions change
+  const pushHistory = useCallback(() => {
+    historyRef.current = [...historyRef.current, [...regionsRef.current]].slice(-50);
+  }, []);
+
   // Web Audio Nodes
   const audioCtxRef = useRef<AudioContext | null>(null);
   const sourceRef = useRef<any>(null);
@@ -36,18 +51,62 @@ export default function WaveformEditor({
     regionsRef.current = regions;
   }, [regions]);
 
+  // Keyboard: Ctrl+Z = undo, Delete/Backspace = remove selected region
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      // Don't fire inside text inputs
+      const tag = (e.target as HTMLElement)?.tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA") return;
+
+      if ((e.ctrlKey || e.metaKey) && e.key === "z") {
+        e.preventDefault();
+        if (historyRef.current.length === 0) return;
+        const prev = historyRef.current[historyRef.current.length - 1];
+        historyRef.current = historyRef.current.slice(0, -1);
+        if (wsRegionsRef.current) {
+          const wsAll: any[] = wsRegionsRef.current.getRegions();
+          // Remove WaveSurfer regions not in the restored state
+          for (const wsr of wsAll) {
+            if (!prev.find((r: SilenceRegion) => r.id === wsr.id)) wsr.remove();
+          }
+        }
+        onRegionsChange(prev);
+      }
+
+      if ((e.key === "Delete" || e.key === "Backspace" || e.key === "x") && !e.ctrlKey && !e.metaKey) {
+        const selId = selectedRegionIdRef.current;
+        if (!selId) return;
+        e.preventDefault();
+        pushHistory();
+        // Remove from WaveSurfer visually
+        if (wsRegionsRef.current) {
+          const wsAll = wsRegionsRef.current.getRegions();
+          const target = wsAll.find((r: any) => r.id === selId);
+          if (target) target.remove();
+        }
+        selectedRegionIdRef.current = null;
+        onRegionsChange(regionsRef.current.filter((r) => r.id !== selId));
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pushHistory, onRegionsChange]);
+
   const handleDoubleClick = useCallback(
     (regionId: string) => {
+      pushHistory();
       const updated = regionsRef.current.map((r) =>
         r.id === regionId ? { ...r, ignored: !r.ignored } : r
       );
       onRegionsChange(updated);
     },
-    [onRegionsChange]
+    [onRegionsChange, pushHistory]
   );
 
   const handleRegionUpdate = useCallback(
     (regionId: string, start: number, end: number) => {
+      pushHistory();
       const updated = regionsRef.current.map((r) =>
         r.id === regionId
           ? { ...r, start, end, duration: end - start }
@@ -55,7 +114,7 @@ export default function WaveformEditor({
       );
       onRegionsChange(updated);
     },
-    [onRegionsChange]
+    [onRegionsChange, pushHistory]
   );
 
   useEffect(() => {
@@ -111,7 +170,15 @@ export default function WaveformEditor({
           region.on("update-end", () => {
             handleRegionUpdate(newRegion.id, region.start, region.end);
           });
+          region.on("click", () => {
+            // Select this region for Delete key
+            selectedRegionIdRef.current = newRegion.id;
+            // Highlight: give it a bright border via element style
+            const el = region.element as HTMLElement | undefined;
+            if (el) { el.style.outline = "2px solid rgba(239,68,68,0.9)"; el.style.zIndex = "10"; }
+          });
 
+          pushHistory();
           onRegionsChange([...regionsRef.current, newRegion]);
         }
       });
@@ -134,9 +201,16 @@ export default function WaveformEditor({
             resize: true,
           });
 
-          // Double-click to toggle
+          // Double-click to toggle keep/cut
           region.on("dblclick", () => {
             handleDoubleClick(r.id);
+          });
+
+          // Click to select
+          region.on("click", () => {
+            selectedRegionIdRef.current = r.id;
+            const el = region.element as HTMLElement | undefined;
+            if (el) { el.style.outline = "2px solid rgba(239,68,68,0.9)"; el.style.zIndex = "10"; }
           });
 
           // Drag/resize to update boundaries
@@ -182,10 +256,8 @@ export default function WaveformEditor({
         }
       });
 
-      // Play/pause events to sync local react state
-      ws.on("interaction", () => {
-        ws.playPause();
-      });
+      // Play/pause driven ONLY by the dedicated button — clicking the waveform
+      // just seeks the playhead, it does NOT auto-play.
       ws.on("play", () => setIsPlaying(true));
       ws.on("pause", () => setIsPlaying(false));
 
@@ -215,26 +287,85 @@ export default function WaveformEditor({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [audioUrl]);
 
-  // Zoom via Ctrl+Scroll
+  // Wheel handler: plain scroll → pan, Ctrl+scroll → zoom-to-cursor
+  // Must be on wrapperRef (the overflow-x-auto div), NOT containerRef (WaveSurfer intercepts that)
   useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
+    const wrapper = wrapperRef.current;
+    if (!wrapper) return;
+
+    // Track mouse X so we know where to anchor the zoom
+    const trackMouseX = (e: MouseEvent) => {
+      const rect = wrapper.getBoundingClientRect();
+      mouseXRef.current = e.clientX - rect.left;
+    };
+    wrapper.addEventListener("mousemove", trackMouseX);
 
     const handleWheel = (e: WheelEvent) => {
       if (e.ctrlKey || e.metaKey) {
+        // Zoom-to-cursor: keep the time under the mouse fixed after zoom
         e.preventDefault();
         setZoom((prev) => {
           const newZoom = Math.max(10, Math.min(300, prev + (e.deltaY < 0 ? 15 : -15)));
           if (wsRef.current) {
             wsRef.current.zoom(newZoom);
+            // After the zoom, re-anchor scroll so the hovered time stays put:
+            // timeAtMouse = (scrollLeft + mouseX) / oldZoom
+            // newScrollLeft = timeAtMouse * newZoom - mouseX
+            const mouseX = mouseXRef.current;
+            const timeAtMouse = (wrapper.scrollLeft + mouseX) / prev;
+            requestAnimationFrame(() => {
+              wrapper.scrollLeft = timeAtMouse * newZoom - mouseX;
+            });
           }
           return newZoom;
         });
+      } else {
+        // Convert vertical scroll → horizontal pan
+        e.preventDefault();
+        wrapper.scrollLeft += e.deltaY * 2;
       }
     };
 
-    container.addEventListener("wheel", handleWheel, { passive: false });
-    return () => container.removeEventListener("wheel", handleWheel);
+    wrapper.addEventListener("wheel", handleWheel, { passive: false });
+    return () => {
+      wrapper.removeEventListener("wheel", handleWheel);
+      wrapper.removeEventListener("mousemove", trackMouseX);
+    };
+  }, []);
+
+  // Alt+drag to pan
+  useEffect(() => {
+    const wrapper = wrapperRef.current;
+    if (!wrapper) return;
+
+    const onMouseDown = (e: MouseEvent) => {
+      if (!e.altKey) return;
+      e.preventDefault();
+      isDraggingRef.current = true;
+      dragStartRef.current = { x: e.clientX, scrollLeft: wrapper.scrollLeft };
+      wrapper.style.cursor = "grabbing";
+    };
+
+    const onMouseMove = (e: MouseEvent) => {
+      if (!isDraggingRef.current) return;
+      e.preventDefault();
+      const dx = e.clientX - dragStartRef.current.x;
+      wrapper.scrollLeft = dragStartRef.current.scrollLeft - dx;
+    };
+
+    const onMouseUp = () => {
+      isDraggingRef.current = false;
+      wrapper.style.cursor = "";
+    };
+
+    wrapper.addEventListener("mousedown", onMouseDown);
+    window.addEventListener("mousemove", onMouseMove);
+    window.addEventListener("mouseup", onMouseUp);
+    return () => {
+      wrapper.removeEventListener("mousedown", onMouseDown);
+      window.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("mouseup", onMouseUp);
+    };
   }, []);
 
   // Toggle Studio Voice Emulation Switch
@@ -282,8 +413,12 @@ export default function WaveformEditor({
 
   return (
     <div className="space-y-4">
-      {/* Waveform */}
-      <div className="overflow-hidden rounded-2xl border border-slate-200 dark:border-white/5 bg-slate-100 dark:bg-black/30 p-4">
+      {/* Waveform — overflow-x-auto so it scrolls when zoomed in */}
+      <div
+        ref={wrapperRef}
+        className="overflow-x-auto rounded-2xl border border-slate-200 dark:border-white/5 bg-slate-100 dark:bg-black/30 p-4 scroll-smooth"
+        style={{ scrollbarWidth: "thin", scrollbarColor: "rgba(124,58,237,0.4) transparent" }}
+      >
         <div ref={containerRef} className="w-full" />
       </div>
 
@@ -364,11 +499,17 @@ export default function WaveformEditor({
 
         {/* Instructions */}
         <p className="text-center text-xs text-slate-500 dark:text-slate-600">
-          <strong className="text-slate-700 dark:text-slate-400">Drag</strong> region edges
+          <strong className="text-slate-700 dark:text-slate-400">Scroll</strong> to pan
           &nbsp;·&nbsp;
-          <strong className="text-slate-700 dark:text-slate-400">Double-click</strong> to select
+          <strong className="text-slate-700 dark:text-slate-400">Ctrl+Scroll</strong> to zoom
           &nbsp;·&nbsp;
-          <strong className="text-slate-700 dark:text-slate-400">Ctrl + Scroll</strong> to zoom
+          <strong className="text-slate-700 dark:text-slate-400">Click</strong> region to select
+          &nbsp;·&nbsp;
+          <strong className="text-slate-700 dark:text-slate-400">Delete / X</strong> to remove selected
+          &nbsp;·&nbsp;
+          <strong className="text-slate-700 dark:text-slate-400">Ctrl+Z</strong> to undo
+          &nbsp;·&nbsp;
+          <strong className="text-slate-700 dark:text-slate-400">Double-click</strong> to toggle cut
         </p>
       </div>
     </div>

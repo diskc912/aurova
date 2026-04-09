@@ -16,6 +16,13 @@ export default function AuthModal({ open, onClose, onSuccess, reason = "limit" }
   if (!open) return null;
 
   const handleSignIn = async () => {
+    // If we are in the isolated editor route, redirect to home to sign in
+    // as popups are blocked by COOP: same-origin headers in the editor.
+    if (window.location.pathname.startsWith("/editor")) {
+      window.location.href = "/?reason=" + reason;
+      return;
+    }
+
     try {
       await signInWithGoogle();
       onSuccess();

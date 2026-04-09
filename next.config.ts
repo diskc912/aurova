@@ -4,20 +4,45 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
-        source: "/(.*)",
+        // TARGET ONLY THE EDITOR: 
+        // This ensures the Home page (/) stays "normal" so Login works.
+        source: "/editor/:path*", 
         headers: [
           {
-            // "credentialless" is the modern alternative to "require-corp".
-            // It keeps self.crossOriginIsolated = true (so SharedArrayBuffer
-            // works for FFmpeg multi-threading) while allowing third-party
-            // scripts like the Cashfree SDK to load without needing their
-            // own Cross-Origin-Resource-Policy header.
             key: "Cross-Origin-Embedder-Policy",
             value: "credentialless",
           },
           {
             key: "Cross-Origin-Opener-Policy",
             value: "same-origin",
+          },
+        ],
+      },
+      {
+        // TARGET THE BASE EDITOR PAGE
+        source: "/editor", 
+        headers: [
+          {
+            key: "Cross-Origin-Embedder-Policy",
+            value: "credentialless",
+          },
+          {
+            key: "Cross-Origin-Opener-Policy",
+            value: "same-origin",
+          },
+        ],
+      },
+      {
+        // TARGET THE FFmpeg ASSETS
+        source: "/ffmpeg/:path*",
+        headers: [
+          {
+            key: "Cross-Origin-Embedder-Policy",
+            value: "credentialless",
+          },
+          {
+            key: "Cross-Origin-Resource-Policy",
+            value: "cross-origin",
           },
         ],
       },

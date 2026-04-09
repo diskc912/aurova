@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import Navbar from "@/components/Navbar";
 import AuthModal from "@/components/AuthModal";
@@ -9,7 +9,19 @@ import AuthModal from "@/components/AuthModal";
 export default function LandingPage() {
   const { user } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authReason, setAuthReason] = useState<"limit" | "voluntary">("voluntary");
+
+  useEffect(() => {
+    const reason = searchParams.get("reason");
+    if (reason && (reason === "limit" || reason === "voluntary")) {
+      setAuthReason(reason as "limit" | "voluntary");
+      setShowAuthModal(true);
+      // Clean up the URL
+      router.replace("/");
+    }
+  }, [searchParams, router]);
 
   const handleGetStarted = () => {
     if (user) {
@@ -113,7 +125,7 @@ export default function LandingPage() {
       <AuthModal
         open={showAuthModal}
         onClose={() => setShowAuthModal(false)}
-        reason="voluntary"
+        reason={authReason}
         onSuccess={() => {
           setShowAuthModal(false);
           router.push("/editor");

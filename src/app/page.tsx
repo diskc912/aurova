@@ -25,7 +25,7 @@ function LandingPageContent() {
 
   const handleGetStarted = () => {
     if (user) {
-      router.push("/editor");
+      window.location.href = "/editor";
     } else {
       setShowAuthModal(true);
     }
@@ -77,7 +77,7 @@ function LandingPageContent() {
               </button>
               
               <button
-                onClick={() => router.push("/editor")}
+                onClick={() => window.location.href = "/editor"}
                 className="rounded-2xl border border-slate-200 dark:border-white/10 bg-white/50 dark:bg-white/5 px-10 py-5 font-bold text-slate-900 dark:text-slate-400 backdrop-blur-lg transition hover:bg-slate-100 dark:hover:bg-white/10 dark:hover:text-white"
               >
                 Try as Guest
@@ -128,7 +128,7 @@ function LandingPageContent() {
         reason={authReason}
         onSuccess={() => {
           setShowAuthModal(false);
-          router.push("/editor");
+          window.location.href = "/editor";
         }}
       />
     </>

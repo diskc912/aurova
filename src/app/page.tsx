@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import Navbar from "@/components/Navbar";
 import AuthModal from "@/components/AuthModal";
 
-export default function LandingPage() {
+function LandingPageContent() {
   const { user } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -132,5 +132,17 @@ export default function LandingPage() {
         }}
       />
     </>
+  );
+}
+
+export default function LandingPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex h-screen items-center justify-center bg-stitch dark:bg-[#0a0a0a]">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-violet-500 border-t-transparent" />
+      </div>
+    }>
+      <LandingPageContent />
+    </Suspense>
   );
 }

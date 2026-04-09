@@ -12,11 +12,18 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const appId = process.env.CASHFREE_APP_ID;
+    const appId = process.env.CASHFREE_APP_ID || process.env.NEXT_PUBLIC_CASHFREE_APP_ID;
     const secretKey = process.env.CASHFREE_SECRET_KEY;
-    const environment = process.env.CASHFREE_ENVIRONMENT || "sandbox";
+    
+    // Auto-detect environment based on key prefix
+    const isProd = secretKey?.startsWith("cfsk_ma_prod_");
+    const environment = process.env.CASHFREE_ENVIRONMENT || (isProd ? "production" : "sandbox");
 
     if (!appId || !secretKey) {
+      console.error("❌ CASHFREE CONFIG ERROR: Missing keys.", { 
+        hasAppId: !!appId, 
+        hasSecretKey: !!secretKey 
+      });
       return NextResponse.json(
         { error: "Payment gateway is not configured on the server." },
         { status: 500 }
@@ -55,12 +62,14 @@ export async function POST(req: NextRequest) {
     const data = await response.json();
 
     if (!response.ok) {
-      console.error("Cashfree Order Error Data:", data);
+      console.error("🔴 CASHFREE GATEWAY ERROR:", data);
       return NextResponse.json(
         { error: data.message || "Failed to create payment order" },
         { status: 500 }
       );
     }
+
+    console.log("🟢 CASHFREE ORDER CREATED:", data.order_id);
 
     // Return the session ID which is used by the frontend SDK
     return NextResponse.json({ 

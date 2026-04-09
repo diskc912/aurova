@@ -447,11 +447,34 @@ export default function WaveformEditor({
         </div>
       </div>
 
-      <div className="flex flex-col items-center gap-4">
-        <div className="flex w-full items-center justify-between gap-4 py-2 border-t border-slate-200 dark:border-white/5 pt-4 mt-2">
-          {/* Zoom Slider Control */}
-          <div className="flex flex-1 items-center gap-3 ml-2">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-slate-400">
+      {/* PRIMARY PLAYBACK ENGINE */}
+      <div className="flex flex-col items-center justify-center py-8 border-y border-slate-200 dark:border-white/5 bg-slate-50/50 dark:bg-white/[0.02]">
+        <button
+          onClick={() => wsRef.current?.playPause()}
+          className="group relative flex h-20 w-20 items-center justify-center rounded-full bg-violet-600 text-white shadow-2xl shadow-violet-500/40 transition-all hover:scale-110 active:scale-95 hover:bg-violet-500 focus:outline-none"
+        >
+          <div className="absolute inset-0 rounded-full bg-violet-400 opacity-20 blur-xl group-hover:opacity-40 transition-opacity" />
+          
+          {isPlaying ? (
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
+              <rect x="6" y="4" width="4" height="16" />
+              <rect x="14" y="4" width="4" height="16" />
+            </svg>
+          ) : (
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="currentColor" className="ml-2">
+              <polygon points="5 3 19 12 5 21 5 3" />
+            </svg>
+          )}
+        </button>
+        <p className="mt-4 text-[10px] font-bold uppercase tracking-[0.3em] text-slate-500 dark:text-slate-600">
+          Studio Playback
+        </p>
+      </div>
+
+      <div className="flex flex-col items-center gap-6 py-4">
+        <div className="flex w-full max-w-2xl items-center justify-between gap-4 py-2">
+          <div className="flex flex-1 items-center gap-4">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-slate-400">
               <circle cx="11" cy="11" r="8" />
               <line x1="21" y1="21" x2="16.65" y2="16.65" />
               <line x1="8" y1="11" x2="14" y2="11" />
@@ -467,37 +490,17 @@ export default function WaveformEditor({
                 setZoom(val);
                 wsRef.current?.zoom(val);
               }}
-              className="h-1.5 flex-1 cursor-pointer appearance-none rounded-lg bg-slate-200 accent-violet-500 dark:bg-white/10"
+              className="h-1 flex-1 cursor-pointer appearance-none rounded-full bg-slate-200 accent-violet-500 dark:bg-white/10"
             />
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-slate-400">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-slate-400">
               <circle cx="11" cy="11" r="8" />
               <line x1="21" y1="21" x2="16.65" y2="16.65" />
               <line x1="8" y1="11" x2="14" y2="11" />
               <line x1="11" y1="8" x2="11" y2="14" />
             </svg>
           </div>
-
-          {/* Play / Pause Toggle Button */}
-          <button
-            onClick={() => wsRef.current?.playPause()}
-            className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-violet-600 text-white shadow-lg shadow-violet-500/30 transition hover:scale-105 hover:bg-violet-500 focus:outline-none"
-          >
-            {isPlaying ? (
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                <rect x="6" y="4" width="4" height="16" />
-                <rect x="14" y="4" width="4" height="16" />
-              </svg>
-            ) : (
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" className="ml-1">
-                <polygon points="5 3 19 12 5 21 5 3" />
-              </svg>
-            )}
-          </button>
-          
-          <div className="flex-1" /> {/* Spacer */}
         </div>
 
-        {/* Instructions */}
         <p className="text-center text-xs text-slate-500 dark:text-slate-600">
           <strong className="text-slate-700 dark:text-slate-400">Scroll</strong> to pan
           &nbsp;·&nbsp;

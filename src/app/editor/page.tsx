@@ -409,19 +409,6 @@ export default function EditorPage() {
 
             <div className="flex flex-wrap justify-center gap-3 pt-2">
               <button
-                onClick={() => {
-                  const history = regionHistoryRef.current;
-                  if (history.length === 0) return;
-                  const prev = history[history.length - 1];
-                  regionHistoryRef.current = history.slice(0, -1);
-                  setRegions(prev);
-                }}
-                disabled={regionHistoryRef.current.length === 0}
-                className="flex items-center gap-2 rounded-xl border border-slate-300 dark:border-white/10 px-5 py-3.5 text-sm font-semibold text-slate-600 dark:text-slate-400 transition hover:border-violet-500/40 hover:text-violet-600 dark:hover:text-violet-300 disabled:opacity-40"
-              >
-                Undo
-              </button>
-              <button
                 onClick={handleProcess}
                 disabled={regions.filter((r) => !r.ignored).length === 0}
                 className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-violet-600 to-fuchsia-600 px-8 py-3.5 font-semibold text-white shadow-lg transition hover:shadow-violet-500/40 disabled:opacity-50"

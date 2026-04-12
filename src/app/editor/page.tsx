@@ -19,7 +19,6 @@ import UploadZone from "@/components/UploadZone";
 import ProcessingView from "@/components/ProcessingView";
 import AuthModal from "@/components/AuthModal";
 import HowToUseModal from "@/components/HowToUseModal";
-import Link from "next/link";
 
 // Dynamic import to avoid SSR for WaveSurfer
 const WaveformEditor = dynamic(
@@ -413,7 +412,7 @@ export default function EditorPage() {
         )}
 
         <div className="mt-16 flex flex-col items-center gap-2 pb-8">
-          <Link
+          <a
             href="/pricing"
             className="group relative inline-flex items-center gap-2 overflow-hidden rounded-full bg-gradient-to-r from-emerald-500 to-teal-400 px-8 py-3 text-sm font-bold text-white shadow-lg shadow-emerald-500/25 transition-all hover:scale-105 hover:shadow-emerald-500/40 focus:outline-none"
           >
@@ -422,7 +421,7 @@ export default function EditorPage() {
               <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
             </svg>
             <span>Donate & Support</span>
-          </Link>
+          </a>
           <p className="mt-4 text-xs text-slate-600 dark:text-slate-600 uppercase tracking-widest font-bold">
             🔒 100% Secure Local Processing
           </p>

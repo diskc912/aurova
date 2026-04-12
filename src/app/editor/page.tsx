@@ -19,7 +19,7 @@ import UploadZone from "@/components/UploadZone";
 import ProcessingView from "@/components/ProcessingView";
 import AuthModal from "@/components/AuthModal";
 import HowToUseModal from "@/components/HowToUseModal";
-import DonatePanel from "@/components/DonatePanel";
+import Link from "next/link";
 
 // Dynamic import to avoid SSR for WaveSurfer
 const WaveformEditor = dynamic(
@@ -285,23 +285,6 @@ export default function EditorPage() {
     setStage("upload");
   }, [downloadUrl]);
 
-  // ── Donate Gateway ──
-  const handleDonatePanel = useCallback(async (amount: number) => {
-    const res = await fetch("/api/donate", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ amount }),
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || "Failed to generate payment link.");
-    if ((window as any).Cashfree) {
-      const cashfree = (window as any).Cashfree({ mode: data.environment });
-      cashfree.checkout({ paymentSessionId: data.payment_session_id, redirectTarget: "_self" });
-    } else {
-      throw new Error("Payment SDK not loaded. Please refresh the page.");
-    }
-  }, []);
-
   return (
     <>
       <Navbar showSignIn={false} />
@@ -430,7 +413,16 @@ export default function EditorPage() {
         )}
 
         <div className="mt-16 flex flex-col items-center gap-2 pb-8">
-          <DonatePanel onDonate={handleDonatePanel} />
+          <Link
+            href="/pricing"
+            className="group relative inline-flex items-center gap-2 overflow-hidden rounded-full bg-gradient-to-r from-emerald-500 to-teal-400 px-8 py-3 text-sm font-bold text-white shadow-lg shadow-emerald-500/25 transition-all hover:scale-105 hover:shadow-emerald-500/40 focus:outline-none"
+          >
+            <div className="absolute inset-0 bg-white/20 opacity-0 transition-opacity group-hover:opacity-100" />
+            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+            </svg>
+            <span>Donate & Support</span>
+          </Link>
           <p className="mt-4 text-xs text-slate-600 dark:text-slate-600 uppercase tracking-widest font-bold">
             🔒 100% Secure Local Processing
           </p>
@@ -439,7 +431,6 @@ export default function EditorPage() {
 
       <AuthModal open={showAuthModal} onClose={() => setShowAuthModal(false)} reason={authReason} onSuccess={() => { setShowAuthModal(false); handleProcess(); }} />
       <HowToUseModal open={showHowTo} onClose={() => setShowHowTo(false)} />
-      <Script src="https://sdk.cashfree.com/js/v3/cashfree.js" strategy="lazyOnload" />
     </>
   );
 }

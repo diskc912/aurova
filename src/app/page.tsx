@@ -2,9 +2,12 @@
 
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import Script from "next/script";
 import { useAuth } from "@/hooks/useAuth";
 import Navbar from "@/components/Navbar";
 import AuthModal from "@/components/AuthModal";
+import HomeDonatePanel from "@/components/HomeDonatePanel";
+import { Supporter, getSupporters, saveSupporter } from "@/lib/supporters";
 
 function LandingPageContent() {
   const { user } = useAuth();
@@ -12,6 +15,15 @@ function LandingPageContent() {
   const searchParams = useSearchParams();
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authReason, setAuthReason] = useState<"limit" | "voluntary">("voluntary");
+  const [supporters, setSupporters] = useState<Supporter[]>([]);
+
+  useEffect(() => {
+    let mounted = true;
+    getSupporters().then((data) => {
+      if (mounted) setSupporters(data);
+    });
+    return () => { mounted = false; };
+  }, []);
 
   useEffect(() => {
     const reason = searchParams.get("reason");
@@ -28,6 +40,39 @@ function LandingPageContent() {
       window.location.href = "/editor";
     } else {
       setShowAuthModal(true);
+    }
+  };
+
+  const handleDonate = async (amount: number, name: string) => {
+    const res = await fetch("/api/donate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ amount }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Failed to generate payment link.");
+    
+    if ((window as any).Cashfree) {
+      const cashfree = (window as any).Cashfree({ mode: data.environment });
+      
+      // We wrap checkout in a Promise since Cashfree allows .then() after popup closes
+      await cashfree.checkout({ 
+        paymentSessionId: data.payment_session_id, 
+        redirectTarget: "_modal" 
+      }).then(async (result: any) => {
+        if (result.error) {
+          throw new Error("Payment failed or was cancelled.");
+        }
+        if (result.paymentDetails) {
+          // Payment Successful! Save to Firebase.
+          await saveSupporter(name, amount);
+          // Refresh the supporters list
+          const updated = await getSupporters();
+          setSupporters(updated);
+        }
+      });
+    } else {
+      throw new Error("Payment SDK not loaded. Please refresh the page.");
     }
   };
 
@@ -84,6 +129,39 @@ function LandingPageContent() {
               </button>
             </div>
 
+            <div className="mt-8 flex justify-center">
+              <HomeDonatePanel onDonate={handleDonate} />
+            </div>
+
+            {/* Supporters Section */}
+            <div className="mt-16 w-full max-w-4xl rounded-3xl border border-slate-200 dark:border-white/10 bg-slate-100 dark:bg-white/[0.03] p-10 shadow-2xl">
+              <div className="mb-8 flex flex-col items-center">
+                <span className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500/10 text-2xl">🏆</span>
+                <h2 className="text-3xl font-extrabold text-slate-900 dark:text-white">Our Supporters</h2>
+                <p className="mt-2 text-center text-slate-600 dark:text-slate-400 max-w-lg">
+                  These amazing people help keep AutoCut free, fast, and constantly improving.
+                </p>
+              </div>
+
+              {supporters.length > 0 ? (
+                <div className="mb-1 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+                  {supporters.map((s) => (
+                    <div key={s.id} className="flex flex-col items-center justify-center rounded-2xl border border-slate-200 dark:border-white/5 bg-white dark:bg-white/5 p-4 transition-all hover:scale-105 hover:bg-emerald-500/5 hover:border-emerald-500/30">
+                      <div className="mb-2 text-emerald-500">
+                        {s.amount >= 5000 ? "👑" : s.amount >= 1000 ? "🔥" : s.amount >= 500 ? "🏆" : s.amount >= 200 ? "💜" : s.amount >= 100 ? "🚀" : s.amount >= 50 ? "⭐" : "🌱"}
+                      </div>
+                      <p className="text-sm font-bold text-slate-800 dark:text-slate-200 text-center line-clamp-1">{s.name}</p>
+                      <p className="mt-1 text-xs font-medium text-emerald-600 dark:text-emerald-400">₹{s.amount}</p>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="mb-1 rounded-2xl border border-dashed border-slate-300 dark:border-white/10 py-10 text-center">
+                  <p className="text-sm text-slate-500 dark:text-slate-400">Be the first to show some love! ❤️</p>
+                </div>
+              )}
+            </div>
+
             {/* Feature Icons */}
             <div className="mt-24 grid w-full grid-cols-1 gap-8 sm:grid-cols-3">
               {[
@@ -131,6 +209,7 @@ function LandingPageContent() {
           window.location.href = "/editor";
         }}
       />
+      <Script src="https://sdk.cashfree.com/js/v3/cashfree.js" strategy="lazyOnload" />
     </>
   );
 }

@@ -32,19 +32,9 @@ export default function Navbar({
     <nav className="fixed top-0 left-0 right-0 z-50 border-b border-border-subtle bg-white/80 dark:bg-[#07080d]/80 backdrop-blur-xl transition-colors duration-300">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
         {/* Logo */}
-        <a href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-violet-600 to-fuchsia-500 shadow-lg shadow-violet-500/20">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5">
-              <circle cx="6" cy="6" r="3" />
-              <circle cx="6" cy="18" r="3" />
-              <line x1="20" y1="4" x2="8.12" y2="15.88" />
-              <line x1="14.47" y1="14.48" x2="20" y2="20" />
-              <line x1="8.12" y1="8.12" x2="12" y2="12" />
-            </svg>
-          </div>
-          <span className="text-lg font-bold tracking-tight text-slate-900 dark:text-white">
-            AutoCut<span className="ml-1 text-violet-600 dark:text-violet-400">Video</span>
-          </span>
+        <a href="/" className="flex items-center hover:opacity-80 transition-opacity" title="AutoCut">
+          <img src="/logo-dark-theme.png" alt="AutoCut Dark Logo" className="h-16 w-auto hidden dark:block" />
+          <img src="/logo-light-theme.png" alt="AutoCut Light Logo" className="h-16 w-auto block dark:hidden" />
         </a>
 
         <div className="flex items-center gap-3">

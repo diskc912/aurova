@@ -80,24 +80,20 @@ function LandingPageContent() {
     <>
       <Navbar onLoginClick={() => setShowAuthModal(true)} />
       
-      <main className="relative overflow-hidden pt-32 pb-24">
-        {/* Background Gradients */}
-        <div className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-30">
-          <div className="h-[600px] w-[600px] rounded-full bg-violet-600/30 blur-[120px]" />
-          <div className="ml-[-200px] h-[400px] w-[400px] rounded-full bg-fuchsia-600/20 blur-[100px]" />
-        </div>
+      <main className="relative overflow-hidden pt-32 pb-24 animate-slide-up">
+
 
         <div className="relative mx-auto max-w-6xl px-6">
           <div className="flex flex-col items-center text-center">
             {/* Tagline */}
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-violet-500/20 bg-violet-500/10 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-violet-600 dark:text-violet-400">
-              <span className="flex h-2 w-2 rounded-full bg-violet-500 animate-pulse" />
+            <div className="mb-6 inline-flex items-center gap-2 border border-slate-300 dark:border-white/20 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-slate-800 dark:text-slate-300 rounded-sm">
+              <span className="flex h-2 w-2 rounded-full bg-slate-400 dark:bg-slate-300 animate-pulse" />
               Revolutionizing Video Editing
             </div>
 
-            <h1 className="mb-8 max-w-4xl text-5xl font-extrabold tracking-tight text-slate-900 dark:text-white sm:text-7xl">
+            <h1 className="mb-8 max-w-4xl text-5xl md:text-7xl font-extrabold tracking-tight text-slate-900 dark:text-white">
               Remove Silence from Your Videos 
-              <span className="block bg-gradient-to-r from-violet-600 to-fuchsia-500 bg-clip-text text-transparent">
+              <span className="block mt-2 font-normal italic">
                 With One Click.
               </span>
             </h1>
@@ -110,20 +106,19 @@ function LandingPageContent() {
             <div className="flex flex-wrap justify-center gap-4">
               <button
                 onClick={handleGetStarted}
-                className="group relative flex items-center gap-3 overflow-hidden rounded-2xl bg-gradient-to-r from-violet-600 to-fuchsia-600 px-10 py-5 font-bold text-white shadow-xl shadow-violet-500/25 transition hover:scale-105 hover:shadow-violet-500/40"
+                className="group relative flex items-center gap-3 overflow-hidden rounded-md bg-black dark:bg-white px-10 py-5 font-bold text-white dark:text-black transition hover:opacity-80 shadow-md"
               >
-                <span className="relative z-10 flex items-center gap-2">
+                <span className="relative z-10 flex items-center gap-2 text-sm">
                   Get Started for Free
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="transition-transform group-hover:translate-x-1">
                     <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
                   </svg>
                 </span>
-                <div className="absolute inset-0 z-0 bg-white/10 opacity-0 transition group-hover:opacity-100" />
               </button>
               
               <button
                 onClick={() => window.location.href = "/editor"}
-                className="rounded-2xl border border-slate-200 dark:border-white/10 bg-white/50 dark:bg-white/5 px-10 py-5 font-bold text-slate-900 dark:text-slate-400 backdrop-blur-lg transition hover:bg-slate-100 dark:hover:bg-white/10 dark:hover:text-white"
+                className="rounded-md border border-slate-300 dark:border-white/20 bg-transparent px-10 py-5 font-bold text-slate-900 dark:text-white transition hover:bg-slate-100 dark:hover:bg-white/10 text-sm"
               >
                 Try as Guest
               </button>
@@ -134,10 +129,10 @@ function LandingPageContent() {
             </div>
 
             {/* Supporters Section */}
-            <div className="mt-16 w-full max-w-4xl rounded-3xl border border-slate-200 dark:border-white/10 bg-slate-100 dark:bg-white/[0.03] p-10 shadow-2xl">
+            <div className="mt-16 w-full max-w-4xl rounded-sm border border-slate-300 dark:border-white/10 bg-white dark:bg-[#111] p-10 shadow-sm">
               <div className="mb-8 flex flex-col items-center">
-                <span className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500/10 text-2xl">🏆</span>
-                <h2 className="text-3xl font-extrabold text-slate-900 dark:text-white">Our Supporters</h2>
+                <span className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 dark:bg-white/10 text-2xl">⚡</span>
+                <h2 className="text-3xl font-bold text-slate-900 dark:text-white">Our Supporters</h2>
                 <p className="mt-2 text-center text-slate-600 dark:text-slate-400 max-w-lg">
                   These amazing people help keep AutoCut free, fast, and constantly improving.
                 </p>

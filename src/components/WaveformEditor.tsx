@@ -133,9 +133,9 @@ export default function WaveformEditor({
 
       const ws = WaveSurfer.create({
         container: containerRef.current,
-        waveColor: "rgba(124, 58, 237, 0.35)",
-        progressColor: "rgba(124, 58, 237, 0.7)",
-        cursorColor: "#2dd4bf",
+        waveColor: "rgba(150, 150, 150, 0.35)",
+        progressColor: "rgba(100, 100, 100, 0.70)",
+        cursorColor: "#888888",
         cursorWidth: 2,
         barWidth: 2,
         barGap: 1,
@@ -195,7 +195,7 @@ export default function WaveformEditor({
             start: r.start,
             end: r.end,
             color: r.ignored
-              ? "rgba(45, 212, 191, 0.25)"
+              ? "rgba(150, 150, 150, 0.15)"
               : "rgba(239, 68, 68, 0.30)",
             drag: true,
             resize: true,
@@ -400,7 +400,7 @@ export default function WaveformEditor({
       if (match) {
         wsRegion.setOptions({
           color: match.ignored
-            ? "rgba(45, 212, 191, 0.25)"
+            ? "rgba(150, 150, 150, 0.15)"
             : "rgba(239, 68, 68, 0.30)",
         });
       }
@@ -432,16 +432,16 @@ export default function WaveformEditor({
             </span>
           </div>
           <div className="flex items-center gap-2">
-            <span className="inline-block h-3 w-6 rounded bg-teal-400/30" />
+            <span className="inline-block h-3 w-6 rounded bg-slate-400/30" />
             <span className="text-slate-600 dark:text-slate-400">Ignored / Kept</span>
           </div>
         </div>
 
         <div className="flex items-center gap-4 text-sm">
-          <span className="rounded-full bg-violet-500/10 px-3 py-1 font-semibold text-violet-300">
+          <span className="rounded-sm bg-slate-200 dark:bg-white/10 px-3 py-1 font-semibold text-slate-800 dark:text-slate-300">
             {activeRegions.length} cuts
           </span>
-          <span className="rounded-full bg-teal-500/10 px-3 py-1 font-semibold text-teal-300">
+          <span className="rounded-sm bg-slate-200 dark:bg-white/10 px-3 py-1 font-semibold text-slate-800 dark:text-slate-300">
             {totalSaved.toFixed(1)}s saved
           </span>
         </div>
@@ -451,10 +451,8 @@ export default function WaveformEditor({
       <div className="flex flex-col items-center justify-center py-8 border-y border-slate-200 dark:border-white/5 bg-slate-50/50 dark:bg-white/[0.02]">
         <button
           onClick={() => wsRef.current?.playPause()}
-          className="group relative flex h-20 w-20 items-center justify-center rounded-full bg-violet-600 text-white shadow-2xl shadow-violet-500/40 transition-all hover:scale-110 active:scale-95 hover:bg-violet-500 focus:outline-none"
+          className="group relative flex h-20 w-20 items-center justify-center rounded-[4px] bg-black dark:bg-white text-white dark:text-black shadow-md transition-all hover:scale-105 active:scale-95 hover:opacity-80 focus:outline-none"
         >
-          <div className="absolute inset-0 rounded-full bg-violet-400 opacity-20 blur-xl group-hover:opacity-40 transition-opacity" />
-          
           {isPlaying ? (
             <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
               <rect x="6" y="4" width="4" height="16" />
@@ -490,7 +488,7 @@ export default function WaveformEditor({
                 setZoom(val);
                 wsRef.current?.zoom(val);
               }}
-              className="h-1 flex-1 cursor-pointer appearance-none rounded-full bg-slate-200 accent-violet-500 dark:bg-white/10"
+              className="h-1 flex-1 cursor-pointer appearance-none rounded-full bg-slate-200 accent-slate-800 dark:bg-white/10 dark:accent-white"
             />
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-slate-400">
               <circle cx="11" cy="11" r="8" />

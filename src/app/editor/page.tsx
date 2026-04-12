@@ -316,8 +316,8 @@ export default function EditorPage() {
           <div className="space-y-6">
             <div className="flex items-center justify-between rounded-xl border border-slate-200 dark:border-white/5 bg-slate-100 dark:bg-white/[0.03] px-5 py-3">
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-violet-500/10 text-violet-400">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-200 dark:bg-white/10 text-slate-800 dark:text-slate-200">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                     <polygon points="23 7 16 12 23 17 23 7" />
                     <rect x="1" y="5" width="15" height="14" rx="2" />
                   </svg>
@@ -343,28 +343,28 @@ export default function EditorPage() {
               <div className="rounded-xl border border-slate-200 dark:border-white/5 bg-slate-100 dark:bg-white/[0.03] p-4">
                 <div className="mb-2 flex items-center justify-between">
                   <label className="text-xs font-semibold uppercase tracking-wider text-slate-400">Silence Threshold</label>
-                  <span className="rounded-full bg-violet-500/15 px-2.5 py-0.5 text-xs font-bold text-violet-300">{threshold} dB</span>
+                  <span className="rounded-sm bg-slate-200 dark:bg-white/10 px-2.5 py-0.5 text-xs font-bold text-slate-800 dark:text-slate-300">{threshold} dB</span>
                 </div>
-                <input type="range" min="-60" max="-10" step="1" value={threshold} onChange={(e) => setThreshold(parseInt(e.target.value))} className="w-full accent-violet-500" />
+                <input type="range" min="-60" max="-10" step="1" value={threshold} onChange={(e) => setThreshold(parseInt(e.target.value))} className="w-full accent-slate-600 dark:accent-slate-300" />
               </div>
               <div className="rounded-xl border border-slate-200 dark:border-white/5 bg-slate-100 dark:bg-white/[0.03] p-4">
                 <div className="mb-2 flex items-center justify-between">
                   <label className="text-xs font-semibold uppercase tracking-wider text-slate-400">Min Duration</label>
-                  <span className="rounded-full bg-violet-500/15 px-2.5 py-0.5 text-xs font-bold text-violet-300">{minDuration.toFixed(1)}s</span>
+                  <span className="rounded-sm bg-slate-200 dark:bg-white/10 px-2.5 py-0.5 text-xs font-bold text-slate-800 dark:text-slate-300">{minDuration.toFixed(1)}s</span>
                 </div>
-                <input type="range" min="0.1" max="3.0" step="0.1" value={minDuration} onChange={(e) => setMinDuration(parseFloat(e.target.value))} className="w-full accent-violet-500" />
+                <input type="range" min="0.1" max="3.0" step="0.1" value={minDuration} onChange={(e) => setMinDuration(parseFloat(e.target.value))} className="w-full accent-slate-600 dark:accent-slate-300" />
               </div>
               <div className="rounded-xl border border-slate-200 dark:border-white/5 bg-slate-100 dark:bg-white/[0.03] p-4">
                 <div className="mb-2 flex items-center justify-between">
                   <label className="text-xs font-semibold uppercase tracking-wider text-slate-400">Padding (Margin)</label>
-                  <span className="rounded-full bg-blue-500/15 px-2.5 py-0.5 text-xs font-bold text-blue-300">{padding.toFixed(1)}s</span>
+                  <span className="rounded-sm bg-slate-200 dark:bg-white/10 px-2.5 py-0.5 text-xs font-bold text-slate-800 dark:text-slate-300">{padding.toFixed(1)}s</span>
                 </div>
-                <input type="range" min="0" max="1.5" step="0.1" value={padding} onChange={(e) => setPadding(parseFloat(e.target.value))} className="w-full accent-blue-500" />
+                <input type="range" min="0" max="1.5" step="0.1" value={padding} onChange={(e) => setPadding(parseFloat(e.target.value))} className="w-full accent-slate-600 dark:accent-slate-300" />
               </div>
               <div className="rounded-xl border border-slate-200 dark:border-white/5 bg-slate-100 dark:bg-white/[0.03] p-4">
                 <div className="mb-2 flex items-center justify-between">
                   <label className="text-xs font-semibold uppercase tracking-wider text-slate-400">Export Mode</label>
-                  <span className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${exportMode === "fast" ? "bg-amber-500/15 text-amber-300" : "bg-green-500/15 text-green-300"}`}>{exportMode.toUpperCase()}</span>
+                  <span className={`rounded-sm px-2.5 py-0.5 text-xs font-bold bg-slate-200 dark:bg-white/10 text-slate-800 dark:text-slate-300`}>{exportMode.toUpperCase()}</span>
                 </div>
                 <div className="mt-2 flex overflow-hidden rounded-lg border border-slate-200 dark:border-white/10 bg-slate-200 dark:bg-black/50 p-1">
                   <button onClick={() => setExportMode("fast")} className={`flex-1 rounded-md py-1.5 text-xs font-bold transition ${exportMode === "fast" ? "bg-white shadow dark:bg-white/10 text-slate-900 dark:text-white" : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"}`}>FAST</button>
@@ -374,7 +374,7 @@ export default function EditorPage() {
               <div className="rounded-xl border border-slate-200 dark:border-white/5 bg-slate-100 dark:bg-white/[0.03] p-4">
                 <div className="mb-2 flex items-center justify-between">
                   <label className="text-xs font-semibold uppercase tracking-wider text-slate-400">Voice Enhance</label>
-                  <span className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${enhanceVoice ? "bg-violet-500/15 text-violet-600 dark:text-violet-300" : "bg-slate-200 text-slate-600 dark:bg-slate-500/15 dark:text-slate-400"}`}>{enhanceVoice ? "ON" : "OFF"}</span>
+                  <span className={`rounded-sm px-2.5 py-0.5 text-xs font-bold bg-slate-200 dark:bg-white/10 text-slate-800 dark:text-slate-300`}>{enhanceVoice ? "ON" : "OFF"}</span>
                 </div>
                 <div className="mt-2 flex overflow-hidden rounded-lg border border-slate-200 dark:border-white/10 bg-slate-200 dark:bg-black/50 p-1">
                   <button onClick={() => setEnhanceVoice(false)} className={`flex-1 rounded-md py-1.5 text-xs font-bold transition ${!enhanceVoice ? "bg-white shadow dark:bg-white/10 text-slate-900 dark:text-white" : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"}`}>OFF</button>
@@ -384,7 +384,7 @@ export default function EditorPage() {
             </div>
 
             <div className="flex justify-center">
-              <button onClick={handleRedetect} className="rounded-lg border border-white/10 px-4 py-2 text-sm font-medium text-slate-400 transition hover:border-violet-500/30 hover:text-violet-300">↻ Re-detect with new settings</button>
+              <button onClick={handleRedetect} className="rounded-sm border border-slate-300 dark:border-white/20 px-4 py-2 text-sm font-medium text-slate-800 dark:text-slate-300 transition hover:bg-slate-100 dark:hover:bg-white/5 uppercase tracking-widest text-xs">↻ Re-detect with new settings</button>
             </div>
 
             <WaveformEditor audioUrl={audioUrl} regions={regions} onRegionsChange={setRegionsWithHistory} enhanceVoice={enhanceVoice} />
@@ -393,7 +393,7 @@ export default function EditorPage() {
               <button
                 onClick={handleProcess}
                 disabled={regions.filter((r) => !r.ignored).length === 0}
-                className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-violet-600 to-fuchsia-600 px-8 py-3.5 font-semibold text-white shadow-lg transition hover:shadow-violet-500/40 disabled:opacity-50"
+                className="flex items-center gap-2 rounded-md bg-black dark:bg-white px-8 py-3.5 text-sm font-bold uppercase tracking-widest text-white dark:text-black transition hover:opacity-80 disabled:opacity-50"
               >
                 Remove Silence & Download
               </button>
@@ -414,9 +414,9 @@ export default function EditorPage() {
         <div className="mt-16 flex flex-col items-center gap-2 pb-8">
           <a
             href="/pricing"
-            className="group relative inline-flex items-center gap-2 overflow-hidden rounded-full bg-gradient-to-r from-emerald-500 to-teal-400 px-8 py-3 text-sm font-bold text-white shadow-lg shadow-emerald-500/25 transition-all hover:scale-105 hover:shadow-emerald-500/40 focus:outline-none"
+            className="group relative inline-flex items-center gap-2 overflow-hidden rounded-sm bg-black dark:bg-white px-8 py-3 text-xs uppercase tracking-widest font-bold text-white dark:text-black shadow-md transition-all hover:scale-105 hover:opacity-90 focus:outline-none border border-black dark:border-white"
           >
-            <div className="absolute inset-0 bg-white/20 opacity-0 transition-opacity group-hover:opacity-100" />
+            <div className="absolute inset-0 bg-white/10 dark:bg-black/5 opacity-0 transition-opacity group-hover:opacity-100" />
             <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
             </svg>

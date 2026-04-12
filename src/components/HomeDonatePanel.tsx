@@ -67,9 +67,9 @@ export default function HomeDonatePanel({ onDonate }: Props) {
       {/* Trigger button */}
       <button
         onClick={() => setOpen((v) => !v)}
-        className="group relative inline-flex items-center gap-2 overflow-hidden rounded-full bg-gradient-to-r from-emerald-500 to-teal-400 px-8 py-3 text-sm font-bold text-white shadow-lg shadow-emerald-500/25 transition-all hover:scale-105 hover:shadow-emerald-500/40 focus:outline-none"
+        className="group relative inline-flex items-center gap-2 overflow-hidden rounded-sm bg-black dark:bg-white px-8 py-3 text-xs uppercase tracking-widest font-bold text-white dark:text-black shadow-md transition-all hover:scale-105 hover:opacity-90 focus:outline-none border border-black dark:border-white"
       >
-        <div className="absolute inset-0 bg-white/20 opacity-0 transition-opacity group-hover:opacity-100" />
+        <div className="absolute inset-0 bg-white/10 dark:bg-black/5 opacity-0 transition-opacity group-hover:opacity-100" />
         <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
         </svg>
@@ -177,7 +177,7 @@ export default function HomeDonatePanel({ onDonate }: Props) {
           <button
             onClick={handleSubmit}
             disabled={loading}
-            className="w-full rounded-xl bg-gradient-to-r from-emerald-500 to-teal-400 py-2.5 text-sm font-bold text-white shadow transition hover:opacity-90 disabled:opacity-60 disabled:cursor-not-allowed"
+            className="w-full rounded-sm bg-black dark:bg-white py-2.5 text-xs uppercase tracking-widest font-bold text-white dark:text-black shadow transition hover:opacity-80 disabled:opacity-60 disabled:cursor-not-allowed"
           >
             {loading ? "Opening payment…" : `Donate ₹${amount || "?"} via Cashfree`}
           </button>

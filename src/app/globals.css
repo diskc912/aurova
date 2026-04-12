@@ -6,21 +6,21 @@
   --color-bg-app: var(--bg-app);
   --color-text-main: var(--text-main);
   --color-border-subtle: var(--border-subtle);
-  --font-family-outfit: "Outfit", sans-serif;
+  --font-family-playfair: var(--font-family-playfair), serif;
 }
 
 @layer base {
   :root {
-    --bg-app: #f8fafc; /* very light gray/slate */
-    --text-main: #0f172a; /* slate-900 */
-    --border-subtle: rgba(15, 23, 42, 0.1);
-    --dot-color: rgba(0, 0, 0, 0.08);
+    --bg-app: #fafafa;
+    --text-main: #111111;
+    --border-subtle: rgba(17, 17, 17, 0.1);
+    --grid-color: rgba(0, 0, 0, 0.04);
   }
   .dark {
-    --bg-app: #07080d; /* deep dark */
-    --text-main: #f1f5f9; /* slate-100 */
+    --bg-app: #0f0f0f;
+    --text-main: #eeeeee;
     --border-subtle: rgba(255, 255, 255, 0.1);
-    --dot-color: rgba(255, 255, 255, 0.06);
+    --grid-color: rgba(255, 255, 255, 0.04);
   }
 }
 
@@ -28,14 +28,16 @@
 body {
   background-color: var(--bg-app);
   color: var(--text-main);
-  font-family: var(--font-family-outfit);
+  font-family: var(--font-family-playfair);
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* Stitch dot pattern */
+/* Thin Grid Pattern */
 .bg-stitch {
-  background-image: radial-gradient(var(--dot-color) 1.5px, transparent 1px);
-  background-size: 24px 24px;
+  background-size: 40px 40px;
+  background-image: 
+    linear-gradient(to right, var(--grid-color) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid-color) 1px, transparent 1px);
 }
 
 /* Custom scrollbar */
@@ -46,8 +48,18 @@ body {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(124, 58, 237, 0.3);
+  background: rgba(150, 150, 150, 0.3);
   border-radius: 3px;
+}
+
+/* Slide Up Animation */
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-slide-up {
+  opacity: 0;
+  animation: slideUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 /* Wavesurfer region handles */

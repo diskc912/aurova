@@ -57,7 +57,7 @@ export default function RootLayout({
   };
 
   return (
-    <html lang="en" className={`dark ${playfairDisplay.variable}`}>
+    <html lang="en" className={`dark ${playfairDisplay.variable}`} suppressHydrationWarning>
       <body suppressHydrationWarning className="bg-stitch min-h-screen antialiased">
         <script
           type="application/ld+json"

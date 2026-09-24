@@ -122,6 +122,13 @@ function LandingPageContent() {
               >
                 Try as Guest
               </button>
+
+              <a
+                href="/clip"
+                className="rounded-md border border-slate-300 dark:border-white/20 bg-transparent px-10 py-5 font-bold text-slate-900 dark:text-white transition hover:bg-slate-100 dark:hover:bg-white/10 text-sm"
+              >
+                Clip a YouTube Video
+              </a>
             </div>
 
             <div className="mt-8 flex justify-center">
